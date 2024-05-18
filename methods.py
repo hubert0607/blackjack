@@ -49,20 +49,23 @@ class BlackjackGame:
         return 0  # Draw
 
 
+
 class BlackjackAgent:
     def __init__(self):
         # self.steps = 0
         self.q_values = defaultdict(float)
-        self.action_counts = defaultdict(int) #huj wie po co to
-        self.state_count = defaultdict(int)
+        self.action_counts = defaultdict(int)
+        # self.state_count = defaultdict(int)
 
     def __get_state_action(self, state, action):
         return state + (action,)
 
+
+    #TODO w sumie to nie wiem czy alpha jest potrzebna w tym wzorze
     def update_q_value(self, state, action, reward, alpha):
         # self.steps = 0
         sa = self.__get_state_action(state, action)
-        self.action_counts[sa] += 1
+        # self.action_counts[sa] += 1
         self.q_values[sa] += alpha * (reward - self.q_values[sa])
         # self.steps = self.action_counts[sa]
 
@@ -78,25 +81,27 @@ class BlackjackAgent:
 
         if random.random() < epsilon:
             return random.choice(['HIT', 'STAND'])
+        
         hit_value = self.q_values[self.__get_state_action(state, 'HIT')]
         stand_value = self.q_values[self.__get_state_action(state, 'STAND')]
         return 'HIT' if hit_value > stand_value else 'STAND'
 
-    def montecarlo_states_counts(self, state):
+    # def montecarlo_states_counts(self, state):
         
-        self.state_counts[state] += 1
-        return self.state_counts[state]
+    #     self.state_counts[state] += 1
+    #     return self.state_counts[state]
 
 
 def play_blackjack(black_agent,episodes, alpha, epsilon_function):
     agent = black_agent()
-    for _ in range(episodes):
+    for episode in range(episodes):
         game = BlackjackGame()
         state = game.get_state()
         action = ""
         while action != "STAND":
             
-            k = agent.montecarlo_states_counts(state)
+            # k = agent.montecarlo_states_counts(state)
+            k = episode+1
             action = agent.choose_action(state, epsilon_function(k)) 
 
             game.player_action(action)

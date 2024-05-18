@@ -7,6 +7,7 @@ class SarsaAgent(BlackjackAgent):
         sa = self.__get_state_action(state, action)
         self.action_counts[sa] += 1
         alpha = 1/(self.action_counts[sa]+1)
+        # just_future = self.q_values[sa]
 
         self.q_values[sa] += alpha * (reward - self.q_values[sa])
 
