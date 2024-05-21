@@ -4,13 +4,15 @@ from methods import BlackjackAgent, play_blackjack
 class SarsaAgent(BlackjackAgent):
     def update_q_value(self, state, action, reward, alpha):
 
-        sa = self.__get_state_action(state, action)
-        self.action_counts[sa] += 1
+        sa = self.get_state_action(state, action)
+        self.action_counts[sa] += 1 
         alpha = 1/(self.action_counts[sa]+1)
+        
         # just_future = self.q_values[sa]
-
-        self.q_values[sa] += alpha * (reward - self.q_values[sa])
-
+        if action == "STAND":
+            self.q_values[sa] += alpha * (reward - self.q_values[sa])
+        else:
+            self.q_values[sa] += alpha * (reward + )
 
 first_start = lambda k: 1/10
 second_start = lambda k: 1/k

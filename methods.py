@@ -48,6 +48,13 @@ class BlackjackGame:
             return -1  # Dealer wins
         return 0  # Draw
 
+    def get_result_for_hit(self):
+        player_sum = self.__sum_hand(self.player_hand)
+        if player_sum > 21:
+            return -1
+        if player_sum == 21:
+            return 1
+        return 0
 
 
 class BlackjackAgent:
@@ -57,15 +64,15 @@ class BlackjackAgent:
         self.action_counts = defaultdict(int)
         # self.state_count = defaultdict(int)
 
-    def __get_state_action(self, state, action):
+    def get_state_action(self, state, action):
         return state + (action,)
 
 
     #TODO w sumie to nie wiem czy alpha jest potrzebna w tym wzorze
     def update_q_value(self, state, action, reward, alpha):
         # self.steps = 0
-        sa = self.__get_state_action(state, action)
-        # self.action_counts[sa] += 1
+        sa = self.get_state_action(state, action)
+        self.action_counts[sa] += 1
         self.q_values[sa] += alpha * (reward - self.q_values[sa])
         # self.steps = self.action_counts[sa]
 
@@ -82,8 +89,8 @@ class BlackjackAgent:
         if random.random() < epsilon:
             return random.choice(['HIT', 'STAND'])
         
-        hit_value = self.q_values[self.__get_state_action(state, 'HIT')]
-        stand_value = self.q_values[self.__get_state_action(state, 'STAND')]
+        hit_value = self.q_values[self.get_state_action(state, 'HIT')]
+        stand_value = self.q_values[self.get_state_action(state, 'STAND')]
         return 'HIT' if hit_value > stand_value else 'STAND'
 
     # def montecarlo_states_counts(self, state):
@@ -101,12 +108,14 @@ def play_blackjack(black_agent,episodes, alpha, epsilon_function):
         while action != "STAND":
             
             # k = agent.montecarlo_states_counts(state)
+
+
             k = episode+1
             action = agent.choose_action(state, epsilon_function(k)) 
 
             game.player_action(action)
             state = game.get_state()
-            if action == 'STAND' or state[0] > 21: #state[0] means player sum
+            if action == 'STAND' or state[0] >= 21: #state[0] means player sum
                 reward = game.get_result()
                 agent.update_q_value(state, action, reward, alpha)
 
@@ -114,4 +123,35 @@ def play_blackjack(black_agent,episodes, alpha, epsilon_function):
 
 
 
-    
+def play_blackjack_montecarlo(black_agent,episodes, epsilon_function):
+    agent = black_agent()
+    for episode in range(episodes):
+        game = BlackjackGame()
+        state = game.get_state()
+        action = ""
+        sa_during_game = {}
+
+        while action != "STAND":
+
+            
+
+            k = episode+1
+            action = agent.choose_action(state, epsilon_function(k)) 
+
+
+            game.player_action(action)
+            state = game.get_state()
+            sa_during_game[state + (action, )] = None
+            if action == 'STAND' or state[0] > 21: #state[0] means player sum
+                reward = game.get_result()
+                # sa_during_game[state + (action, )] = None
+
+                for key in sa_during_game:
+                    sa_during_game[key] = reward
+                    agent.update_q_value(key, reward)
+                    
+        
+    # return agent.q_values 
+
+    for item in agent.q_values:
+        print(item, agent.q_values[item], agent.action_counts[item])
